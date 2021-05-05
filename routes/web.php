@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +14,19 @@ use App\Http\Controllers\HomeController;
 |
 */
 
-Route::get('/', HomeController::class);
+Route::get('/', [CategoryController::class, 'index'])
+    ->name('index');
+
+Route::post('/store', [CategoryController::class, 'store'])
+    ->name('store');
+
+Route::put('/move-up', [CategoryController::class, 'moveUp'])
+    ->name('moveUp');
+
+Route::put('/move', [CategoryController::class, 'move'])
+    ->name('move');
+
+Route::delete('/destroy', [CategoryController::class, 'destroy'])
+    ->name('destroy');
 
 Auth::routes();
