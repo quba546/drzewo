@@ -1,7 +1,7 @@
 <ul>
     @foreach($childs as $child)
         <li>
-            {{ $child->title }}
+            {{ $child->title . " (ID: $child->id)" }}
             <form action="{{ route('moveUp') }}" method="POST">
                 @csrf
                 @method('PUT')

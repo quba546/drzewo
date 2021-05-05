@@ -29,4 +29,7 @@ Route::put('/move', [CategoryController::class, 'move'])
 Route::delete('/destroy', [CategoryController::class, 'destroy'])
     ->name('destroy');
 
+Route::put('/update', [CategoryController::class, 'update'])
+    ->name('update');
+
 Auth::routes();

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <title>Laravel Category Treeview Example</title>
+    <title>Drzewo</title>
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -11,27 +11,23 @@
 </head>
 <body>
     <div class="container">
-        @if ($message = Session::get('success'))
-            <div class="alert alert-success alert-block">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                <strong>{{ $message }}</strong>
-            </div>
-        @elseif ($message = Session::get('error'))
-            <div class="alert alert-danger alert-block">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                <strong>{{ $message }}</strong>
-            </div>
-        @endif
-        <div class="panel panel-primary">
-            <div class="panel-heading">Manage Category TreeView</div>
-            <div class="panel-body">
+        <x-message></x-message>
+        <div>
+            <div>Manage Category TreeView</div>
+            <div>
                 <div class="row">
                     <div class="col-6">
                         <h3>Category List</h3>
-                        <ul id="tree">
+                        <ul>
                             @foreach($categories as $category)
                                 <li>
-                                    {{ $category->title }}
+                                    {{ $category->title . " (ID: $category->id)" }}
+                                    <form action="{{ route('destroy') }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="hidden" name="id" value="{{ $category->id }}">
+                                        <button type="submit" class="action-btn"><i class="fas fa-times"></i></button>
+                                    </form>
                                     @if(count($category->childs))
                                         @include('manageChild',['childs' => $category->childs])
                                     @endif
@@ -45,7 +41,6 @@
                                 <h3>Add New Category</h3>
                                 <form action="{{ route('store') }}" method="POST">
                                     @csrf
-
                                     <div class="form-group {{ $errors->has('title') ? 'has-error' : '' }}">
                                         <label for="title">Title</label>
                                         <input type="text" name="title" id="title" value="{{ old('title') }}" class="form-control"
@@ -58,7 +53,7 @@
                                         <select name="parent_id" id="parent_id" class="form-control">
                                             <option selected value="0">Wybierz rodzica...</option>
                                             @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title }}</option>
+                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>
@@ -75,13 +70,12 @@
                                 <form action="{{ route('move') }}" method="POST">
                                     @csrf
                                     @method('PUT')
-
                                     <div class="form-group {{ $errors->has('parent_id') ? 'has-error' : '' }}">
                                         <label for="category-to-move"></label>
                                         <select name="category_id" id="category-to-move" class="form-control">
                                             <option selected value="0">Select category to move...</option>
                                             @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title }}</option>
+                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>
@@ -92,7 +86,7 @@
                                         <select name="parent_id" id="parent-to-moved" class="form-control">
                                             <option selected value="0">Select parent...</option>
                                             @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title }}</option>
+                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>
@@ -101,7 +95,34 @@
                                     <div class="form-group">
                                         <button class="btn btn-success">Move</button>
                                     </div>
+                                </form>
+                            </div>
+                            <div class="col-12">
+                                <h3>Edit Category</h3>
+                                <form action="{{ route('update') }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="form-group {{ $errors->has('parent_id') ? 'has-error' : '' }}">
+                                        <label for="category-to-edit"></label>
+                                        <select name="id" id="category-to-edit" class="form-control">
+                                            <option selected value="0">Select category to edit...</option>
+                                            @foreach ($allCategories as $id => $title)
+                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="text-danger">{{ $errors->first('parent_id') }}</span>
+                                    </div>
 
+                                    <div class="form-group {{ $errors->has('newTitle') ? 'has-error' : '' }}">
+                                        <label for="title-edit">New Title</label>
+                                        <input type="text" name="newTitle" id="title-edit" value="{{ old('newTitle') }}" class="form-control"
+                                               placeholder="Edit title">
+                                        <span class="text-danger">{{ $errors->first('newTitle') }}</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button class="btn btn-success">Edit</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>

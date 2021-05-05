@@ -18,7 +18,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'title' => 'required|unique:categories'
+            'title' => 'required|alpha_num|max:50'
         ]);
 
         $input = $request->all();
@@ -66,22 +66,34 @@ class CategoryController extends Controller
             'id' => 'required|integer'
         ]);
 
-        function delete(int $id)
-        {
-            Category::where('id', '=', $id)->delete();
-            $ids = Category::where('parent_id', '=', $id)->get('id')->toArray();
-            foreach ($ids as $id) {
-                $id = $id['id'];
-                Category::where('id', '=', $id)->delete();
-                if (Category::where('parent_id', '=', $id)->get()) {
-                    delete($id);
-                }
-            }
-        }
-
-        delete($request->id);
+        $this->delete($request->id);
 
         return back()->with('success', 'Deleted selected category');
+    }
+
+    public function update(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required|integer',
+            'newTitle' => 'required|alpha_num|max:50'
+        ]);
+
+        Category::find($request->id)->update(['title' => $request->newTitle]);
+
+        return back()->with('success', 'Edited selected category');
+    }
+
+    private function delete(int $id)
+    {
+        Category::where('id', '=', $id)->delete();
+        $ids = Category::where('parent_id', '=', $id)->get('id')->toArray();
+        foreach ($ids as $id) {
+            $id = $id['id'];
+            Category::where('id', '=', $id)->delete();
+            if (Category::where('parent_id', '=', $id)->get()) {
+                $this->delete($id);
+            }
+        }
     }
 }
 
