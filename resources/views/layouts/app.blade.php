@@ -23,12 +23,20 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{{ route('index') }}">Strona główna</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('login') }}">Logowanie</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('register') }}">Rejestracja</a>
-                </li>
+                @guest()
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">Logowanie</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('register') }}">Rejestracja</a>
+                    </li>
+                @endguest
+                @auth()
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">Wyloguj</button>
+                    </form>
+                @endauth
             </ul>
         </div>
     </nav>

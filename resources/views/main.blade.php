@@ -3,11 +3,15 @@
 @section('content')
     <div class="container">
         <h1 class="text-center m-4">Mechanizm zarządzania strukturą drzewiastą</h1>
-        <div class="m-4">
+        <div class="mt-4 mb-4">
             <x-message></x-message>
         </div>
         <div class="row">
-            <div class="col-6">
+            @can('admin', App\Models\User::class)
+                <div class="col-6">
+            @else
+                <div class="col-12">
+            @endcan
                 <div class="col-12">
                     <div class="card border border-primary">
                         <h5 class="card-header">Wyświetl gałąź</h5>
@@ -36,14 +40,16 @@
                                 @foreach($categories as $category)
                                     <li>
                                         {{ $category->title . " (ID: $category->id)" }}
-                                        <div class="action-btn">
-                                            <form action="{{ route('destroy') }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="id" value="{{ $category->id }}">
-                                                <button type="submit" title="Usuń" class="ml-1 mr-1"><i class="fas fa-times btn-destroy"></i></button>
-                                            </form>
-                                        </div>
+                                        @can('admin', App\Models\User::class)
+                                            <div class="action-btn">
+                                                <form action="{{ route('destroy') }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <input type="hidden" name="id" value="{{ $category->id }}">
+                                                    <button type="submit" title="Usuń" class="ml-1 mr-1"><i class="fas fa-times btn-destroy"></i></button>
+                                                </form>
+                                            </div>
+                                        @endcan
 
                                         @if(count($category->childs))
                                             @include('manageChild',['childs' => $category->childs])
@@ -56,12 +62,12 @@
 
                 </div>
             </div>
+            @can('admin', App\Models\User::class)
             <div class="col-6">
                 <div class="col-12">
-                    <div class="card border border-primary">
+                    <div class="card border border-primary mb-3">
                         <h5 class="card-header">Panel administratora</h5>
                         <div class="card-body pt-3 pb-3">
-
                             <div class="card border border-info">
                                 <div class="card-body pt-3 pb-3">
                                     <h5 class="card-title">Dodaj nową kategorię</h5>
@@ -99,7 +105,7 @@
                                         @method('PUT')
                                         <div class="form-group">
                                             <label for="category-to-move">Wybierz kategorię, którą chcesz przenieść</label>
-                                            <select name="category_id" id="category-to-move" class="form-control form-control-sm">
+                                            <select name="id" id="category-to-move" class="form-control form-control-sm">
                                                 <option selected value="0">Wybierz kategorię...</option>
                                                 @foreach ($allCategories as $category)
                                                     <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
@@ -157,6 +163,7 @@
                     </div>
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 @endsection

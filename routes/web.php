@@ -33,4 +33,4 @@ Route::delete('/destroy', [CategoryController::class, 'destroy'])
 Route::put('/update', [CategoryController::class, 'update'])
     ->name('update');
 
-Auth::routes();
+Auth::routes(['reset' => false]);
