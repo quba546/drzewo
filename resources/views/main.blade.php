@@ -34,7 +34,16 @@
                     </div>
 
                     <div class="card border-primary mt-4">
-                        <h5 class="card-header">Drzewo kategorii</h5>
+                        <h5 class="card-header">Drzewo kategorii
+                            @can('admin', App\Models\User::class)
+                                <span class="pl-3 pr-3">|</span>
+                                <span>
+                                    Sortowanie alfabetyczne
+                                    <a href="{{ route('index', ['show' => $branchId, 'sort' => 'asc']) }}" class="pl-2 pr-2 a-icon" title="rosnąco"><i class="fas fa-arrow-circle-up"></i></a>
+                                    <a href="{{ route('index', ['show' => $branchId, 'sort' => 'desc']) }}" class="pl-2 a-icon" title="malejąco"><i class="fas fa-arrow-circle-down"></i></a>
+                                </span>
+                            @endcan
+                        </h5>
                         <div class="card-body pt-3 pb-3">
                             <ul class="tree">
                                 @foreach($categories as $category)
@@ -77,7 +86,7 @@
                                             <label for="title">Nazwa kategorii</label>
                                             <input type="text" name="title" id="title" value="{{ old('title') }}" class="form-control form-control-sm"
                                                    placeholder="Wpisz nazwę kategorii" maxlength="50" required>
-                                            <span class="text-danger">{{ $errors->first('title') }}</span>
+                                            <span class="text-danger font-weight-bold">{{ $errors->first('title') }}</span>
                                         </div>
 
                                         <div class="form-group  {{ $errors->has('addParentId') ? 'has-error' : '' }}">

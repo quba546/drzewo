@@ -14,8 +14,7 @@ use App\Http\Controllers\CategoryController;
 |
 */
 
-Route::get('/{show?}', [CategoryController::class, 'index'])
-    ->whereNumber('show')
+Route::get('/', [CategoryController::class, 'index'])
     ->name('index');
 
 Route::post('/store', [CategoryController::class, 'store'])

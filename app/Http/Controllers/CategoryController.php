@@ -13,20 +13,33 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, User $user): View
     {
         $this->validate($request, [
-            'show' => 'nullable|integer'
+            'show' => 'nullable|integer',
         ]);
+
+        if ($request->get('sort') === 'asc' || $request->get('sort') === 'desc') {
+            if (! Gate::allows('admin', $user)) {
+                abort(403);
+            }
+
+            $sortDirection = $request->get('sort');
+        } else {
+            $sortDirection = 'asc';
+        }
 
         $branchId = (int) $request->show ?? 0;
 
-        $categories = Category::where('parent_id', '=', $branchId)->get();
+        $categories = Category::where('parent_id', '=', $branchId)
+            ->orderBy('title', $sortDirection)
+            ->get();
         $allCategories = Category::get(['id', 'title', 'parent_id']);
 
         return view('main', [
             'categories' => $categories,
-            'allCategories' => $allCategories
+            'allCategories' => $allCategories,
+            'branchId' => $branchId
         ]);
     }
 
