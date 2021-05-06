@@ -15,9 +15,14 @@ class CategoryController extends Controller
 {
     public function index(Request $request, User $user): View
     {
-        $this->validate($request, [
+        $this->validate($request,
+            [
             'show' => 'nullable|integer',
-        ]);
+            ],
+            [
+                'integer' => 'Pole może zawierać tylko liczby całkowite'
+            ]
+        );
 
         if ($request->get('sort') === 'asc' || $request->get('sort') === 'desc') {
             if (! Gate::allows('admin', $user)) {
@@ -49,10 +54,18 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $this->validate($request, [
+        $this->validate($request,
+            [
             'title' => 'required|alpha_num|max:50',
             'addParentId' => 'required|integer'
-        ]);
+            ],
+            [
+                'required' => 'Pole jest wymagane',
+                'alpha_num' => 'Pole może zawierać tylko litery i cyfry',
+                'max' => 'Pole może zawierać maksymalnie :max znaków',
+                'integer' => 'Pole może zawierać tylko liczby całkowite'
+            ]
+        );
 
         if(Category::where('id', '=', $request->addParentId)->doesntExist() && $request->addParentId != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
@@ -72,10 +85,16 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $this->validate($request, [
+        $this->validate($request,
+            [
             'id' => 'required|integer',
             'parent_id' => 'required|integer'
-        ]);
+            ],
+            [
+                'required' => 'Pole jest wymagane',
+                'integer' => 'Pole może zawierać tylko liczby całkowite'
+            ]
+        );
 
         $parent = Category::where('id', '=', $request->parent_id)->firstOrFail('parent_id');
 
@@ -90,10 +109,16 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $this->validate($request, [
+        $this->validate($request,
+            [
             'moveId' => 'required|integer',
             'parentId' => 'required|integer'
-        ]);
+            ],
+            [
+                'required' => 'Pole jest wymagane',
+                'integer' => 'Pole może zawierać tylko liczby całkowite'
+            ]
+        );
 
         if(Category::where('id', '=', $request->moveId)->doesntExist() && $request->moveId != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
@@ -119,9 +144,15 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $this->validate($request, [
+        $this->validate($request,
+            [
             'id' => 'required|integer'
-        ]);
+            ],
+            [
+                'required' => 'Pole jest wymagane',
+                'integer' => 'Pole może zawierać tylko liczby całkowite'
+            ]
+        );
 
         if(Category::where('id', '=', $request->id)->doesntExist() && $request->id != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
@@ -138,10 +169,18 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $this->validate($request, [
+        $this->validate($request,
+            [
             'editId' => 'required|integer',
             'newTitle' => 'required|alpha_num|max:50'
-        ]);
+            ],
+            [
+                'required' => 'Pole jest wymagane',
+                'alpha_num' => 'Pole może zawierać tylko litery i cyfry',
+                'max' => 'Pole może zawierać maksymalnie :max znaków',
+                'integer' => 'Pole może zawierać tylko liczby całkowite'
+            ]
+        );
 
         if(Category::where('id', '=', $request->editId)->doesntExist() && $request->editId != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
@@ -165,4 +204,3 @@ class CategoryController extends Controller
         }
     }
 }
-
