@@ -80,14 +80,16 @@
                                             <span class="text-danger">{{ $errors->first('title') }}</span>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group  {{ $errors->has('addParentId') ? 'has-error' : '' }}">
                                             <label for="parent_id">Rodzic</label>
-                                            <select name="parent_id" id="parent_id" class="form-control form-control-sm">
-                                                <option selected value="0">Wybierz rodzica...</option>
+                                            <select name="addParentId" id="parent_id" class="form-control form-control-sm">
+                                                <option selected disabled>Wybierz rodzica...</option>
+                                                <option value="0">Root (ID: 0)</option>
                                                 @foreach ($allCategories as $category)
                                                     <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                                 @endforeach
                                             </select>
+                                            <span class="text-danger font-weight-bold">{{ $errors->first('addParentId') }}</span>
                                         </div>
 
                                         <div class="form-group mb-1">
@@ -103,24 +105,27 @@
                                     <form action="{{ route('move') }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <div class="form-group">
+                                        <div class="form-group {{ $errors->has('moveId') ? 'has-error' : '' }}">
                                             <label for="category-to-move">Wybierz kategorię, którą chcesz przenieść</label>
-                                            <select name="id" id="category-to-move" class="form-control form-control-sm">
-                                                <option selected value="0">Wybierz kategorię...</option>
+                                            <select name="moveId" id="category-to-move" class="form-control form-control-sm">
+                                                <option selected disabled>Wybierz kategorię...</option>
                                                 @foreach ($allCategories as $category)
                                                     <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                                 @endforeach
                                             </select>
+                                            <span class="text-danger font-weight-bold">{{ $errors->first('moveId') }}</span>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="parent-to-moved">Wybierz rodzica, do którego chcesz przeniść wybraną kategorię</label>
-                                            <select name="parent_id" id="parent-to-moved" class="form-control form-control-sm">
-                                                <option selected value="0">Wybierz rodzica...</option>
+                                        <div class="form-group  {{ $errors->has('parentId') ? 'has-error' : '' }}" id="moveCategory2">
+                                            <label for="parent-to-moved">Wybierz rodzica, do którego chcesz przenieść wybraną kategorię</label>
+                                            <select name="parentId" id="parent-to-moved" class="form-control form-control-sm">
+                                                <option selected disabled>Wybierz rodzica...</option>
+                                                <option value="0">Root (ID: 0)</option>
                                                 @foreach ($allCategories as $category)
                                                     <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                                 @endforeach
                                             </select>
+                                            <span class="text-danger font-weight-bold">{{ $errors->first('parentId') }}</span>
                                         </div>
 
                                         <div class="form-group mb-1">
@@ -136,21 +141,22 @@
                                     <form action="{{ route('update') }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <div class="form-group">
+                                        <div class="form-group {{ $errors->has('editId') ? 'has-error' : '' }}">
                                             <label for="category-to-edit">Wybierz kategorię, którą chcesz edytować</label>
-                                            <select name="id" id="category-to-edit" class="form-control form-control-sm">
-                                                <option selected value="0">Wybierz kategorię...</option>
+                                            <select name="editId" id="category-to-edit" class="form-control form-control-sm">
+                                                <option selected disabled>Wybierz kategorię...</option>
                                                 @foreach ($allCategories as $category)
                                                     <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                                 @endforeach
                                             </select>
+                                            <span class="text-danger font-weight-bold">{{ $errors->first('editId') }}</span>
                                         </div>
 
                                         <div class="form-group {{ $errors->has('newTitle') ? 'has-error' : '' }}">
                                             <label for="title-edit">Nowy tytuł</label>
                                             <input type="text" name="newTitle" id="title-edit" value="{{ old('newTitle') }}" class="form-control form-control-sm"
                                                    placeholder="Wpisz nowy tytuł" maxlength="50" required>
-                                            <span class="text-danger">{{ $errors->first('newTitle') }}</span>
+                                            <span class="text-danger font-weight-bold">{{ $errors->first('newTitle') }}</span>
                                         </div>
 
                                         <div class="form-group mb-1">

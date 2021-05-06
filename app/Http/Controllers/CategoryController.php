@@ -38,16 +38,16 @@ class CategoryController extends Controller
 
         $this->validate($request, [
             'title' => 'required|alpha_num|max:50',
-            'parent_id' => 'required|integer'
+            'addParentId' => 'required|integer'
         ]);
 
-        if(Category::where('id', '=', $request->parent_id)->doesntExist() && $request->parent_id != 0) {
+        if(Category::where('id', '=', $request->addParentId)->doesntExist() && $request->addParentId != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
         }
 
         Category::create([
             'title' => $request->title,
-            'parent_id' => $request->parent_id
+            'parent_id' => $request->addParentId
         ]);
 
         return back()->with('success', 'Nowa kategoria została dodana');
@@ -78,24 +78,24 @@ class CategoryController extends Controller
         }
 
         $this->validate($request, [
-            'id' => 'required|integer',
-            'parent_id' => 'required|integer'
+            'moveId' => 'required|integer',
+            'parentId' => 'required|integer'
         ]);
 
-        if(Category::where('id', '=', $request->id)->doesntExist() && $request->id != 0) {
+        if(Category::where('id', '=', $request->moveId)->doesntExist() && $request->moveId != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        if(Category::where('id', '=', $request->parent_id)->doesntExist() && $request->parent_id != 0) {
+        if(Category::where('id', '=', $request->parentId)->doesntExist() && $request->parentId != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
         }
 
-        if ($request->id === $request->parent_id) {
+        if ($request->moveId === $request->parentId) {
             return back()->with('error', 'Nie można przenieść kategorii do niej samej');
         }
 
-        Category::where('id', '=', $request->id)
-            ->update(['parent_id' => $request->parent_id]);
+        Category::where('id', '=', $request->moveId)
+            ->update(['parent_id' => $request->parentId]);
 
         return back()->with('success', 'Przeniesiono do innej gałęzi');
     }
@@ -126,15 +126,15 @@ class CategoryController extends Controller
         }
 
         $this->validate($request, [
-            'id' => 'required|integer',
+            'editId' => 'required|integer',
             'newTitle' => 'required|alpha_num|max:50'
         ]);
 
-        if(Category::where('id', '=', $request->id)->doesntExist() && $request->id != 0) {
+        if(Category::where('id', '=', $request->editId)->doesntExist() && $request->editId != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        Category::find($request->id)->update(['title' => $request->newTitle]);
+        Category::find($request->editId)->update(['title' => $request->newTitle]);
 
         return back()->with('success', 'Zmieniono nazwę kategorii');
     }
