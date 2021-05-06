@@ -4,25 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DestroyRequest;
+use App\Http\Requests\MoveRequest;
+use App\Http\Requests\MoveUpRequest;
+use App\Http\Requests\ShowRequest;
+use App\Http\Requests\StoreRequest;
+use App\Http\Requests\UpdateRequest;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request, User $user): View
+    public function index(ShowRequest $request, User $user): View
     {
-        $this->validate($request,
-            [
-            'show' => 'nullable|integer',
-            ],
-            [
-                'integer' => 'Pole może zawierać tylko liczby całkowite'
-            ]
-        );
+        $validated = $request->validated();
 
         if ($request->get('sort') === 'asc' || $request->get('sort') === 'desc') {
             if (! Gate::allows('admin', $user)) {
@@ -34,7 +32,7 @@ class CategoryController extends Controller
             $sortDirection = 'asc';
         }
 
-        $branchId = (int) $request->show ?? 0;
+        $branchId = $validated['show'] ?? 0;
 
         $categories = Category::where('parent_id', '=', $branchId)
             ->orderBy('title', $sortDirection)
@@ -48,145 +46,97 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function store(Request $request, User $user): RedirectResponse
+    public function store(StoreRequest $request, User $user): RedirectResponse
     {
         if (! Gate::allows('admin', $user)) {
             abort(403);
         }
 
-        $this->validate($request,
-            [
-            'title' => 'required|alpha_num|max:50',
-            'addParentId' => 'required|integer'
-            ],
-            [
-                'required' => 'Pole jest wymagane',
-                'alpha_num' => 'Pole może zawierać tylko litery i cyfry',
-                'max' => 'Pole może zawierać maksymalnie :max znaków',
-                'integer' => 'Pole może zawierać tylko liczby całkowite'
-            ]
-        );
+        $validated = $request->validated();
 
-        if(Category::where('id', '=', $request->addParentId)->doesntExist() && $request->addParentId != 0) {
+        if(Category::where('id', '=', $validated['addParentId'])->doesntExist() && $validated['addParentId'] != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
         }
 
         Category::create([
-            'title' => $request->title,
-            'parent_id' => $request->addParentId
+            'title' => $validated['title'],
+            'parent_id' => $validated['addParentId']
         ]);
 
         return back()->with('success', 'Nowa kategoria została dodana');
     }
 
-    public function moveUp(Request $request, User $user): RedirectResponse
+    public function moveUp(MoveUpRequest $request, User $user): RedirectResponse
     {
         if (! Gate::allows('admin', $user)) {
             abort(403);
         }
 
-        $this->validate($request,
-            [
-            'id' => 'required|integer',
-            'parent_id' => 'required|integer'
-            ],
-            [
-                'required' => 'Pole jest wymagane',
-                'integer' => 'Pole może zawierać tylko liczby całkowite'
-            ]
-        );
+        $validated = $request->validated();
 
-        $parent = Category::where('id', '=', $request->parent_id)->firstOrFail('parent_id');
+        $parent = Category::where('id', '=', $validated['parent_id'])->firstOrFail('parent_id');
 
-        Category::where('id', '=', $request->id)->update(['parent_id' => $parent->parent_id]);
+        Category::where('id', '=', $validated['id'])->update(['parent_id' => $parent->parent_id]);
 
         return back()->with('success', 'Przeniesiono poziom wyżej');
     }
 
-    public function move(Request $request, User $user): RedirectResponse
+    public function move(MoveRequest $request, User $user): RedirectResponse
     {
         if (! Gate::allows('admin', $user)) {
             abort(403);
         }
 
-        $this->validate($request,
-            [
-            'moveId' => 'required|integer',
-            'parentId' => 'required|integer'
-            ],
-            [
-                'required' => 'Pole jest wymagane',
-                'integer' => 'Pole może zawierać tylko liczby całkowite'
-            ]
-        );
+        $validated = $request->validated();
 
-        if(Category::where('id', '=', $request->moveId)->doesntExist() && $request->moveId != 0) {
+        if(Category::where('id', '=', $validated['moveId'])->doesntExist() && $validated['moveId'] != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        if(Category::where('id', '=', $request->parentId)->doesntExist() && $request->parentId != 0) {
+        if(Category::where('id', '=', $validated['parentId'])->doesntExist() && $validated['parentId'] != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
         }
 
-        if ($request->moveId === $request->parentId) {
+        if ($validated['moveId'] === $validated['parentId']) {
             return back()->with('error', 'Nie można przenieść kategorii do niej samej');
         }
 
-        Category::where('id', '=', $request->moveId)
-            ->update(['parent_id' => $request->parentId]);
+        Category::where('id', '=', $validated['moveId'])
+            ->update(['parent_id' => $validated['parentId']]);
 
         return back()->with('success', 'Przeniesiono do innej gałęzi');
     }
 
-    public function destroy(Request $request, User $user): RedirectResponse
+    public function destroy(DestroyRequest $request, User $user): RedirectResponse
     {
         if (! Gate::allows('admin', $user)) {
             abort(403);
         }
 
-        $this->validate($request,
-            [
-            'id' => 'required|integer'
-            ],
-            [
-                'required' => 'Pole jest wymagane',
-                'integer' => 'Pole może zawierać tylko liczby całkowite'
-            ]
-        );
+        $validated = $request->validated();
 
-        if(Category::where('id', '=', $request->id)->doesntExist() && $request->id != 0) {
+        if(Category::where('id', '=', $validated['id'])->doesntExist() && $validated['id'] != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        $this->delete((int) $request->id);
+        $this->delete((int) $validated['id']);
 
         return back()->with('success', 'Usunięto kategorię');
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(UpdateRequest $request, User $user): RedirectResponse
     {
         if (! Gate::allows('admin', $user)) {
             abort(403);
         }
 
-        $this->validate($request,
-            [
-            'editId' => 'required|integer',
-            'newTitle' => 'required|alpha_num|max:50'
-            ],
-            [
-                'required' => 'Pole jest wymagane',
-                'alpha_num' => 'Pole może zawierać tylko litery i cyfry',
-                'max' => 'Pole może zawierać maksymalnie :max znaków',
-                'integer' => 'Pole może zawierać tylko liczby całkowite'
-            ]
-        );
+        $validated = $request->validated();
 
-        if(Category::where('id', '=', $request->editId)->doesntExist() && $request->editId != 0) {
+        if(Category::where('id', '=', $validated['editId'])->doesntExist() && $validated['editId'] != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        Category::find($request->editId)->update(['title' => $request->newTitle]);
+        Category::find($validated['editId'])->update(['title' => $validated['newTitle']]);
 
         return back()->with('success', 'Zmieniono nazwę kategorii');
     }

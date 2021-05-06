@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CategoryRequest extends FormRequest
+class MoveUpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,15 +24,16 @@ class CategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'show' => 'nullable|integer',
-            'title' => 'required|alpha_num|max:50',
-            'addParentId' => 'required|integer',
             'id' => 'required|integer',
-            'parent_id' => 'required|integer',
-            'moveId' => 'required|integer',
-            'parentId' => 'required|integer',
-            'editId' => 'required|integer',
-            'newTitle' => 'required|alpha_num|max:50'
+            'parent_id' => 'required|integer'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'required' => 'Pole jest wymagane',
+            'integer' => 'Pole może zawierać tylko liczby całkowite'
         ];
     }
 }
