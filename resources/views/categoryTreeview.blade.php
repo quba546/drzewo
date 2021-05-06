@@ -17,22 +17,45 @@
             <div>
                 <div class="row">
                     <div class="col-6">
+                        <div class="col-12">
+                            <form action="{{ route('index') }}" method="GET">
+                                <div class="form-group {{ $errors->has('parent_id') ? 'has-error' : '' }}">
+                                    <label for="branch_id">Branch</label>
+                                    <select name="show" id="branch_id" class="form-control">
+                                        <option @if (!app('request')->input('show') || app('request')->input('show') === '0') selected @endif value="0">Root (ID: 0)</option>
+                                        @foreach ($allCategories as $category)
+                                            <option @if (app('request')->input('show') == $category->id) selected @endif value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="text-danger">{{ $errors->first('parent_id') }}</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <button class="btn btn-success">Show</button>
+                                </div>
+                            </form>
+                        </div>
                         <h3>Category List</h3>
                         <ul>
-                            @foreach($categories as $category)
-                                <li>
-                                    {{ $category->title . " (ID: $category->id)" }}
-                                    <form action="{{ route('destroy') }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <input type="hidden" name="id" value="{{ $category->id }}">
-                                        <button type="submit" class="action-btn"><i class="fas fa-times"></i></button>
-                                    </form>
-                                    @if(count($category->childs))
-                                        @include('manageChild',['childs' => $category->childs])
-                                    @endif
-                                </li>
-                            @endforeach
+                            <li>
+                                {{ $showCategory }}
+                                <ul>
+                                    @foreach($categories as $category)
+                                        <li>
+                                            {{ $category->title . " (ID: $category->id)" }}
+                                            <form action="{{ route('destroy') }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="id" value="{{ $category->id }}">
+                                                <button type="submit" class="action-btn"><i class="fas fa-times"></i></button>
+                                            </form>
+                                            @if(count($category->childs))
+                                                @include('manageChild',['childs' => $category->childs])
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-6">
@@ -52,8 +75,8 @@
                                         <label for="parent_id">Parent</label>
                                         <select name="parent_id" id="parent_id" class="form-control">
                                             <option selected value="0">Wybierz rodzica...</option>
-                                            @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
+                                            @foreach ($allCategories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>
@@ -74,8 +97,8 @@
                                         <label for="category-to-move"></label>
                                         <select name="category_id" id="category-to-move" class="form-control">
                                             <option selected value="0">Select category to move...</option>
-                                            @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
+                                            @foreach ($allCategories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>
@@ -85,8 +108,8 @@
                                         <label for="parent-to-moved"></label>
                                         <select name="parent_id" id="parent-to-moved" class="form-control">
                                             <option selected value="0">Select parent...</option>
-                                            @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
+                                            @foreach ($allCategories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>
@@ -106,8 +129,8 @@
                                         <label for="category-to-edit"></label>
                                         <select name="id" id="category-to-edit" class="form-control">
                                             <option selected value="0">Select category to edit...</option>
-                                            @foreach ($allCategories as $id => $title)
-                                                <option value="{{ $id }}">{{ $title . " (ID: $id)" }}</option>
+                                            @foreach ($allCategories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->title . " (ID: $category->id)" }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger">{{ $errors->first('parent_id') }}</span>

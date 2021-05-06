@@ -1,18 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Symfony\Component\Console\Input\Input;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::where('parent_id', '=', 0)->get();
-        $allCategories = Category::pluck('title', 'id')->all();
+        $this->validate($request, [
+            'show' => 'nullable|integer'
+        ]);
 
-        return view('categoryTreeView', compact('categories', 'allCategories'));
+        $branchId = (int) $request->show ?? 0;
+
+        $categories = Category::where('parent_id', '=', $branchId)->get();
+        $allCategories = Category::get(['id', 'title', 'parent_id']);
+
+        return view('categoryTreeView', [
+            'categories' => $categories,
+            'allCategories' => $allCategories,
+            'showCategory' => $branchId === 0
+                ? 'Root'
+                : Category::where('id', '=', $branchId)
+                    ->firstOrFail()
+                    ->title
+        ]);
     }
 
     public function store(Request $request)
@@ -66,7 +83,7 @@ class CategoryController extends Controller
             'id' => 'required|integer'
         ]);
 
-        $this->delete($request->id);
+        $this->delete((int) $request->id);
 
         return back()->with('success', 'Deleted selected category');
     }
