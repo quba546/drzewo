@@ -21,7 +21,7 @@ class CategoryController extends Controller
         $categories = Category::where('parent_id', '=', $branchId)->get();
         $allCategories = Category::get(['id', 'title', 'parent_id']);
 
-        return view('categoryTreeView', [
+        return view('main', [
             'categories' => $categories,
             'allCategories' => $allCategories,
             'showCategory' => $branchId === 0
