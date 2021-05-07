@@ -24,7 +24,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|alpha_num|max:50',
+            'title' => 'required|max:50',
             'addParentId' => 'required|integer'
         ];
     }
@@ -33,7 +33,6 @@ class StoreRequest extends FormRequest
     {
         return [
             'required' => 'Pole jest wymagane',
-            'alpha_num' => 'Pole może zawierać tylko litery i cyfry',
             'max' => 'Pole może zawierać maksymalnie :max znaków',
             'integer' => 'Pole może zawierać tylko liczby całkowite'
         ];

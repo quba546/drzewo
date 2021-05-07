@@ -10,14 +10,18 @@ use App\Http\Requests\MoveUpRequest;
 use App\Http\Requests\ShowRequest;
 use App\Http\Requests\StoreRequest;
 use App\Http\Requests\UpdateRequest;
-use App\Models\Category;
 use App\Models\User;
+use App\Repository\CategoryRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
+    public function __construct(private CategoryRepositoryInterface $repository)
+    {
+    }
+
     public function index(ShowRequest $request, User $user): View
     {
         $validated = $request->validated();
@@ -32,12 +36,15 @@ class CategoryController extends Controller
             $sortDirection = 'asc';
         }
 
-        $branchId = $validated['show'] ?? 0;
+        $branchId = isset($validated['show']) ? (int) $validated['show'] : 0;
 
-        $categories = Category::where('parent_id', '=', $branchId)
-            ->orderBy('title', $sortDirection)
-            ->get();
-        $allCategories = Category::get(['id', 'title', 'parent_id']);
+        $categories = $this->repository->getAllStructured($branchId, $sortDirection);
+
+        $allCategories = $this->repository->getAll([
+            'id',
+            'title',
+            'parent_id'
+        ]);
 
         return view('main', [
             'categories' => $categories,
@@ -54,14 +61,11 @@ class CategoryController extends Controller
 
         $validated = $request->validated();
 
-        if(Category::where('id', '=', $validated['addParentId'])->doesntExist() && $validated['addParentId'] != 0) {
+        if($this->repository->checkIfDoesntExist((int) $validated['addParentId']) && $validated['addParentId'] != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
         }
 
-        Category::create([
-            'title' => $validated['title'],
-            'parent_id' => $validated['addParentId']
-        ]);
+        $this->repository->insert($validated['title'], (int) $validated['addParentId']);
 
         return back()->with('success', 'Nowa kategoria została dodana');
     }
@@ -74,9 +78,21 @@ class CategoryController extends Controller
 
         $validated = $request->validated();
 
-        $parent = Category::where('id', '=', $validated['parent_id'])->firstOrFail('parent_id');
+        if ((int) $validated['id'] === 0) {
+            return back()->with('error', 'Nie można przenieść wyżej korzenia');
+        }
 
-        Category::where('id', '=', $validated['id'])->update(['parent_id' => $parent->parent_id]);
+        if($this->repository->checkIfDoesntExist((int) $validated['id']) && $validated['id'] != 0) {
+            return back()->with('error', 'Nie ma takiej kategorii');
+        }
+
+        if($this->repository->checkIfDoesntExist((int) $validated['parent_id']) && $validated['parent_id'] != 0) {
+            return back()->with('error', 'Nie ma takiego rodzica');
+        }
+
+        $parent = $this->repository->getOne((int) $validated['parent_id']);
+
+        $this->repository->edit((int) $validated['id'], 'parent_id', $parent->parent_id);
 
         return back()->with('success', 'Przeniesiono poziom wyżej');
     }
@@ -89,11 +105,15 @@ class CategoryController extends Controller
 
         $validated = $request->validated();
 
-        if(Category::where('id', '=', $validated['moveId'])->doesntExist() && $validated['moveId'] != 0) {
+        if ((int) $validated['moveId'] === 0) {
+            return back()->with('error', 'Nie można przenieść korzenia');
+        }
+
+        if($this->repository->checkIfDoesntExist((int) $validated['moveId']) && $validated['moveId'] != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        if(Category::where('id', '=', $validated['parentId'])->doesntExist() && $validated['parentId'] != 0) {
+        if($this->repository->checkIfDoesntExist((int) $validated['parentId']) && $validated['parentId'] != 0) {
             return back()->with('error', 'Nie ma takiego rodzica');
         }
 
@@ -101,8 +121,7 @@ class CategoryController extends Controller
             return back()->with('error', 'Nie można przenieść kategorii do niej samej');
         }
 
-        Category::where('id', '=', $validated['moveId'])
-            ->update(['parent_id' => $validated['parentId']]);
+        $this->repository->edit((int) $validated['moveId'], 'parent_id', (int) $validated['parentId']);
 
         return back()->with('success', 'Przeniesiono do innej gałęzi');
     }
@@ -115,7 +134,11 @@ class CategoryController extends Controller
 
         $validated = $request->validated();
 
-        if(Category::where('id', '=', $validated['id'])->doesntExist() && $validated['id'] != 0) {
+        if ((int) $validated['id'] === 0) {
+            return back()->with('error', 'Nie można usunąć korzenia');
+        }
+
+        if($this->repository->checkIfDoesntExist((int) $validated['id']) && $validated['id'] != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
@@ -132,23 +155,30 @@ class CategoryController extends Controller
 
         $validated = $request->validated();
 
-        if(Category::where('id', '=', $validated['editId'])->doesntExist() && $validated['editId'] != 0) {
+        if ((int) $validated['editId'] === 0) {
+            return back()->with('error', 'Nie można zmienić nazwy korzenia');
+        }
+
+        if($this->repository->checkIfDoesntExist((int) $validated['editId']) && $validated['editId'] != 0) {
             return back()->with('error', 'Nie ma takiej kategorii');
         }
 
-        Category::find($validated['editId'])->update(['title' => $validated['newTitle']]);
+        $this->repository->edit((int) $validated['editId'], 'title', $validated['newTitle']);
 
         return back()->with('success', 'Zmieniono nazwę kategorii');
     }
 
     private function delete(int $id): void
     {
-        Category::where('id', '=', $id)->delete();
-        $ids = Category::where('parent_id', '=', $id)->get('id')->toArray();
+        $this->repository->delete($id);
+
+        $ids = $this->repository->getAllChildren($id, ['id'])->toArray();
         foreach ($ids as $id) {
             $id = $id['id'];
-            Category::where('id', '=', $id)->delete();
-            if (Category::where('parent_id', '=', $id)->get()) {
+
+            $this->repository->delete($id);
+
+            if ($this->repository->getAllChildren($id, ['id'])) {
                 $this->delete($id);
             }
         }

@@ -25,7 +25,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'editId' => 'required|integer',
-            'newTitle' => 'required|alpha_num|max:50'
+            'newTitle' => 'required|max:50'
         ];
     }
 
@@ -33,7 +33,6 @@ class UpdateRequest extends FormRequest
     {
         return [
             'required' => 'Pole jest wymagane',
-            'alpha_num' => 'Pole może zawierać tylko litery i cyfry',
             'max' => 'Pole może zawierać maksymalnie :max znaków',
             'integer' => 'Pole może zawierać tylko liczby całkowite'
         ];

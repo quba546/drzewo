@@ -8,7 +8,7 @@
         </div>
         <div class="row">
             @can('admin', App\Models\User::class)
-                <div class="col-6">
+                <div class="col-12 col-md-6">
             @else
                 <div class="col-12">
             @endcan
@@ -36,7 +36,8 @@
                     <div class="card border-primary mt-4">
                         <h5 class="card-header">Drzewo kategorii
                             @can('admin', App\Models\User::class)
-                                <span class="pl-3 pr-3">|</span>
+                                <br>
+                                <br>
                                 <span>
                                     Sortowanie alfabetyczne
                                     <a href="{{ route('index', ['show' => $branchId, 'sort' => 'asc']) }}" class="pl-2 pr-2 a-icon" title="rosnąco"><i class="fas fa-arrow-circle-up"></i></a>
@@ -72,7 +73,7 @@
                 </div>
             </div>
             @can('admin', App\Models\User::class)
-            <div class="col-6">
+            <div class="col-12 col-md-6 mt-4 mt-md-0">
                 <div class="col-12">
                     <div class="card border border-primary mb-3">
                         <h5 class="card-header">Panel administratora</h5>
