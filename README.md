@@ -12,6 +12,5 @@ Technologie:
 
 <h4>Przykładowe zdjęcia</h4>
 
-<p align="center"><a href="#" target="_blank"><img src="https://i.ibb.co/G7L20NM/1.jpg" width="400"></a></p>
-
-<p align="center"><a href="#" target="_blank"><img src="https://i.ibb.co/J31HtjP/2.jpg" width="400"></a></p>
+<a href="https://ibb.co/p28zx5K"><img src="https://i.ibb.co/K6kqXSs/1.jpg" alt="1" border="0"></a>
+<a href="https://ibb.co/TWft2M5"><img src="https://i.ibb.co/J31HtjP/2.jpg" alt="2" border="0"></a>
